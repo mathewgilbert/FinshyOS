@@ -1,12 +1,75 @@
 #!/bin/bash
 
-apt update
-apt upgrade
+install_for_root() {
+    echo "=== Mode ROOT ==="
 
-apt install wget curl git
-touch ~/.hushlogin
-rm -rf /etc/motd
-wget https://raw.githubusercontent.com/mathewgilbert/FinshyOS/refs/heads/main/finshy.sh ~/.finshy.sh
+    apt update && apt upgrade -y
+    apt install -y wget curl git
 
-kasih baris akhir di ~/.bashrc 
-bash .finshy.sh
+    touch /root/.hushlogin
+    rm -f /etc/motd
+
+    wget -O /root/.finshy.sh https://raw.githubusercontent.com/mathewgilbert/FinshyOS/main/finshy.sh
+    chmod +x /root/.finshy.sh
+
+    if ! grep -qxF "bash ~/.finshy.sh" /root/.bashrc; then
+        echo "bash ~/.finshy.sh" >> /root/.bashrc
+    fi
+
+    echo "Instalasi ROOT selesai! Tutup terminal dan buka lagi."
+}
+
+install_for_user() {
+    echo "=== Mode USER BIASA (butuh sudo) ==="
+
+    # Pastikan sudo ada
+    if ! command -v sudo >/dev/null 2>&1; then
+        echo "sudo tidak ditemukan! Silakan install sudo dulu."
+        exit 1
+    fi
+
+    # Update & install paket
+    sudo apt update && sudo apt upgrade -y
+    sudo apt install -y wget curl git
+
+    # Nonaktifkan last login & motd
+    touch ~/.hushlogin
+    sudo rm -f /etc/motd
+
+    # Download Finshy
+    wget -O ~/.finshy.sh https://raw.githubusercontent.com/mathewgilbert/FinshyOS/main/finshy.sh
+    chmod +x ~/.finshy.sh
+
+    # Tambahkan ke bashrc jika belum ada
+    if ! grep -qxF "bash ~/.finshy.sh" ~/.bashrc; then
+        echo "bash ~/.finshy.sh" >> ~/.bashrc
+    fi
+
+    echo "Instalasi USER selesai! Tutup terminal dan buka lagi."
+}
+
+clear
+echo "==========================="
+echo "      FINSHY INSTALLER     "
+echo "==========================="
+echo ""
+echo "1) Install sebagai ROOT"
+echo "2) Install sebagai USER (pakai sudo)"
+echo ""
+read -p "Pilih opsi (1/2): " choice
+
+case $choice in
+    1)
+        if [[ $EUID -ne 0 ]]; then
+            echo "Harus dijalankan sebagai root untuk opsi ini."
+            exit 1
+        fi
+        install_for_root
+        ;;
+    2)
+        install_for_user
+        ;;
+    *)
+        echo "Pilihan tidak ada."
+        ;;
+esac
