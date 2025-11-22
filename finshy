@@ -1,4 +1,12 @@
 #!/bin/bash
 
+apt update
+apt upgrade
+
+apt install wget curl git
 touch ~/.hushlogin
 rm -rf /etc/motd
+wget https://raw.githubusercontent.com/mathewgilbert/FinshyOS/refs/heads/main/finshy.sh ~/.finshy.sh
+
+kasih baris akhir di ~/.bashrc 
+bash .finshy.sh
