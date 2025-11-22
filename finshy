@@ -1,0 +1,4 @@
+#!/bin/bash
+
+touch ~/.hushlogin
+rm -rf /etc/motd
